@@ -29,25 +29,20 @@ describe(`유저 포인트 테이블`, () => {
     expect(data).not.toBeNull();
     expect(data.id).toBe(id);
     expect(data.point).toBe(amount);
-    // expect(data.updateMillis).toBe(?);
   });
 
   it(`⭕️ 유저 포인트 테이블에 업데이트할 수 있음`, async () => {
     // given
     const id = 1;
-    let amount = 100;
-    let data = await table.insertOrUpdate(id, amount);
-
-    amount = 200;
+    const amount = 200;
 
     // when
-    data = await table.insertOrUpdate(id, amount);
+    const data = await table.insertOrUpdate(id, amount);
 
     // then
     expect(data).not.toBeNull();
     expect(data.id).toBe(id);
     expect(data.point).toBe(amount);
-    // expect(data.updateMillis).toBe(?);
   });
 
   it(`⭕️ 유저 포인트 테이블에서 포인트를 가져올 수 있음`, async () => {
