@@ -132,4 +132,8 @@ describe(`포인트 컨트롤러`, () => {
     expect(histories.length).toBeGreaterThanOrEqual(1);
     expect(histories[0].id).toBe(userId);
   });
+
+  // TODO: 동시 포인트 충전에 대한 순차 처리 테스트
+  // TODO: 동시 포인트 이용에 대한 순차 처리 테스트
+  // TODO: 동시 포인트 충전/이용에 대한 순차 처리 테스트
 });
