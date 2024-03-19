@@ -52,8 +52,6 @@ export class PointController {
   ): Promise<UserPoint> {
     if (id < 0) throw new Error(`올바르지 않은 ID 값 입니다.`);
 
-    let userPoint = await this.userDb.selectById(id);
-
     const amount = pointDto.amount;
     if (amount < 0) throw new Error(`포인트가 0보다 작습니다.`);
 
@@ -64,10 +62,10 @@ export class PointController {
       Date.now(),
     );
 
-    userPoint = await this.userDb.insertOrUpdate(
-      history.userId,
-      history.amount,
-    );
+    let userPoint = await this.userDb.selectById(id);
+    const charged = userPoint.point + amount;
+
+    userPoint = await this.userDb.insertOrUpdate(id, charged);
 
     return userPoint;
   }
