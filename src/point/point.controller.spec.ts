@@ -2,13 +2,14 @@ import { PointController } from './point.controller';
 import { PointHistoryTable } from '../database/pointhistory.table';
 import { UserPointTable } from '../database/userpoint.table';
 import { PointBody } from './point.dto';
+import { log } from 'console';
 
 describe(`포인트 컨트롤러`, () => {
-  const userDb: UserPointTable = new UserPointTable();
-  const historyDb: PointHistoryTable = new PointHistoryTable();
   let controller: PointController;
 
   beforeAll(() => {
+    const userDb: UserPointTable = new UserPointTable();
+    const historyDb: PointHistoryTable = new PointHistoryTable();
     controller = new PointController(userDb, historyDb);
   });
 
@@ -133,7 +134,49 @@ describe(`포인트 컨트롤러`, () => {
     expect(histories[0].id).toBe(userId);
   });
 
-  // TODO: 동시 포인트 충전에 대한 순차 처리 테스트
-  // TODO: 동시 포인트 이용에 대한 순차 처리 테스트
-  // TODO: 동시 포인트 충전/이용에 대한 순차 처리 테스트
+  it(`✅ 여러 사용자가 동시에 포인트를 충전할 수 있음`, async () => {
+    const userIds = [4, 5, 6];
+    const amount = 100;
+
+    const promises = userIds.map((id) => controller.charge(id, { amount }));
+
+    const results = await Promise.all(promises);
+
+    results.forEach((result, index) => {
+      expect(result.id).toBe(userIds[index]);
+      expect(result.point).toBe(amount);
+      expect(result.updateMillis).toBeDefined();
+    });
+  });
+
+  it(`✅ 여러 사용자가 동시에 포인트를 이용할 수 있음`, async () => {
+    const userIds = [4, 5, 6];
+    const amount = 50;
+
+    const promises = userIds.map((id) => controller.use(id, { amount }));
+
+    const results = await Promise.all(promises);
+
+    for (const result of results) {
+      expect(result.point).toBe(50);
+      expect(result.updateMillis).toBeDefined();
+    }
+  });
+
+  it(`✅ 여러 사용자가 동시에 포인트를 충전/이용할 수 있음`, async () => {
+    const userIds = [4, 5, 6];
+    const chargeAmount = 100;
+    const useAmount = 100;
+
+    const promises = userIds.map(async (id) => {
+      await controller.charge(id, { amount: chargeAmount });
+      return await controller.use(id, { amount: useAmount });
+    });
+
+    const results = await Promise.all(promises);
+
+    for (const result of results) {
+      expect(result.point).toBe(50);
+    }
+  });
 });
