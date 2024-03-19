@@ -2,7 +2,6 @@ import { PointController } from './point.controller';
 import { PointHistoryTable } from '../database/pointhistory.table';
 import { UserPointTable } from '../database/userpoint.table';
 import { PointBody } from './point.dto';
-import { log } from 'console';
 
 describe(`포인트 컨트롤러`, () => {
   let controller: PointController;
