@@ -77,6 +77,14 @@ npm run test userpoint
 
 #### PointController 테스트
 
+##### 테스트 실행
+
+```bash
+npm run test point.controller
+```
+
+##### 테스트 목록
+
 - `point.controller.spec.ts`
 
 ```
