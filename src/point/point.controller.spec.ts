@@ -1,20 +1,31 @@
-import { PointController } from './point.controller';
-import { PointHistoryTable } from '../database/pointhistory.table';
 import { UserPointTable } from '../database/userpoint.table';
-import { PointBody } from './point.dto';
+import { PointController } from './point.controller';
+import { PointDto } from './point.dto';
+import { PointHandler } from './point.handler';
+import { PointReader } from './point.reader';
+import { PointHistoryTable } from '../database/pointhistory.table';
+
+export interface IPointHandler {
+  charge(id: number, pointDto: PointDto): Promise<void>;
+  use(id: number, pointDto: PointDto): Promise<void>;
+}
 
 describe(`포인트 컨트롤러`, () => {
   let controller: PointController;
 
   beforeAll(() => {
-    const userDb: UserPointTable = new UserPointTable();
-    const historyDb: PointHistoryTable = new PointHistoryTable();
-    controller = new PointController(userDb, historyDb);
+    const userDb = new UserPointTable();
+    const historyDb = new PointHistoryTable();
+
+    const pointReader = new PointReader(userDb, historyDb);
+    const pointHandler: IPointHandler = new PointHandler(userDb, historyDb);
+
+    controller = new PointController(pointReader, pointHandler);
   });
 
   it(`❌ 포인트를 충전할 수 없음 - 포인트가 0보다 작음`, () => {
     const userId = 1;
-    const pointBody: PointBody = {
+    const pointBody: PointDto = {
       amount: -1,
     };
 
@@ -25,7 +36,7 @@ describe(`포인트 컨트롤러`, () => {
 
   it(`❌ 포인트를 충전할 수 없음 - 올바르지 않은 ID 값`, () => {
     const userId = -1;
-    const pointBody: PointBody = {
+    const pointBody: PointDto = {
       amount: 100,
     };
 
@@ -36,7 +47,7 @@ describe(`포인트 컨트롤러`, () => {
 
   it(`⭕️ 포인트를 충전할 수 있음`, async () => {
     const userId = 1;
-    const pointBody: PointBody = {
+    const pointBody: PointDto = {
       amount: 100,
     };
 
@@ -48,7 +59,7 @@ describe(`포인트 컨트롤러`, () => {
 
   it(`❌ 포인트를 사용할 수 없음 - 올바르지 않은 ID 값`, () => {
     const userId = -1;
-    const pointBody: PointBody = {
+    const pointBody: PointDto = {
       amount: 100,
     };
 
@@ -59,7 +70,7 @@ describe(`포인트 컨트롤러`, () => {
 
   it(`❌ 포인트를 사용할 수 없음 - 포인트가 0보다 작음`, () => {
     const userId = 1;
-    const pointBody: PointBody = {
+    const pointBody: PointDto = {
       amount: -1,
     };
 
@@ -70,7 +81,7 @@ describe(`포인트 컨트롤러`, () => {
 
   it(`❌ 포인트를 사용할 수 없음 - 사용할 수 있는 포인트가 없거나 적음`, () => {
     const userId = 1;
-    const pointBody: PointBody = {
+    const pointBody: PointDto = {
       amount: 200,
     };
 
@@ -81,7 +92,7 @@ describe(`포인트 컨트롤러`, () => {
 
   it(`⭕️ 포인트를 사용할 수 있음`, async () => {
     const userId = 1;
-    const pointBody: PointBody = {
+    const pointBody: PointDto = {
       amount: 100,
     };
 
