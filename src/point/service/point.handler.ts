@@ -1,49 +1,27 @@
-import { UserId, UserPoint } from '../model/point.model';
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
+import { UserPoint } from '../model/point.model';
 import { IPointRepository } from '../repository/point.repository';
-import { Mutex, MutexInterface, withTimeout } from 'async-mutex';
+
+@Injectable()
 export class PointHandler {
-  constructor(private readonly pointRepository: IPointRepository) {}
+  constructor(
+    @Inject('IPointRepository')
+    private readonly pointRepository: IPointRepository,
+  ) {}
 
-  private readonly mutexes: Map<UserId, MutexInterface> = new Map();
-
-  async charge(id: UserId, amount: number): Promise<UserPoint> {
+  async charge(id: number, amount: number): Promise<UserPoint> {
     this.isValid(id, amount);
-
-    const mutex = this.mutexOf(id);
-    await mutex.acquire();
-    try {
-      return await this.pointRepository.charge(id, amount);
-    } finally {
-      mutex.release();
-    }
+    return await this.pointRepository.charge(id, amount);
   }
 
-  async use(id: UserId, amount: number): Promise<UserPoint> {
+  async use(id: number, amount: number): Promise<UserPoint> {
     this.isValid(id, amount);
-    const mutex = this.mutexOf(id);
-    await mutex.acquire();
-    try {
-      return await this.pointRepository.use(id, amount);
-    } finally {
-      mutex.release();
-    }
+    return await this.pointRepository.use(id, amount);
   }
 
-  private mutexOf(id: UserId): MutexInterface {
-    let mutex = this.mutexes.get(id);
-    if (!mutex) {
-      mutex = withTimeout(
-        new Mutex(),
-        300,
-        new Error(`시간 내에 뮤텍스를 얻지 못했습니다.`),
-      );
-      this.mutexes.set(id, mutex);
-    }
-    return mutex;
-  }
-
-  private isValid(id: UserId, amount: number) {
-    if (id < 0) throw new Error(`올바르지 않은 ID 값 입니다.`);
-    if (amount < 0) throw new Error(`포인트가 0보다 작습니다.`);
+  private isValid(id: number, amount: number) {
+    if (id < 0) throw new BadRequestException(`올바르지 않은 ID 값 입니다.`);
+    if (amount < 0) throw new BadRequestException(`포인트가 0보다 작습니다.`);
+    return;
   }
 }

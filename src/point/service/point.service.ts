@@ -2,7 +2,9 @@ import { PointDto } from '../controller/dtos/point.dto';
 import { PointHandler } from './point.handler';
 import { PointReader } from './point.reader';
 import { PointHistories, UserPoint } from '../model/point.model';
+import { Injectable } from '@nestjs/common';
 
+@Injectable()
 export class PointService {
   constructor(
     private readonly pointHandler: PointHandler,

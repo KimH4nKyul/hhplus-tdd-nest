@@ -3,10 +3,11 @@ import {
   Controller,
   Get,
   Param,
+  ParseIntPipe,
   Patch,
   ValidationPipe,
 } from '@nestjs/common';
-import { PointHistory, UserPoint } from '../model/point.model';
+import { PointHistories, UserPoint } from '../model/point.model';
 import { PointDto } from './dtos/point.dto';
 import { PointService } from '../service/point.service';
 
@@ -18,7 +19,7 @@ export class PointController {
    * TODO - 특정 유저의 포인트를 조회하는 기능을 작성해주세요.
    */
   @Get(':id')
-  async point(@Param('id') id: number): Promise<UserPoint> {
+  async point(@Param('id', ParseIntPipe) id: number): Promise<UserPoint> {
     return await this.pointService.point(id);
   }
 
@@ -26,7 +27,9 @@ export class PointController {
    * TODO - 특정 유저의 포인트 충전/이용 내역을 조회하는 기능을 작성해주세요.
    */
   @Get(':id/histories')
-  async histories(@Param('id') id: number): Promise<PointHistory[]> {
+  async histories(
+    @Param('id', ParseIntPipe) id: number,
+  ): Promise<PointHistories> {
     return await this.pointService.histories(id);
   }
 
@@ -35,10 +38,10 @@ export class PointController {
    */
   @Patch(':id/charge')
   async charge(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) pointDto: PointDto,
-  ): Promise<void> {
-    await this.pointService.charge(id, pointDto);
+  ): Promise<UserPoint> {
+    return await this.pointService.charge(id, pointDto);
   }
 
   /**
@@ -46,9 +49,9 @@ export class PointController {
    */
   @Patch(':id/use')
   async use(
-    @Param('id') id: number,
+    @Param('id', ParseIntPipe) id: number,
     @Body(ValidationPipe) pointDto: PointDto,
-  ): Promise<void> {
-    await this.pointService.use(id, pointDto);
+  ): Promise<UserPoint> {
+    return await this.pointService.use(id, pointDto);
   }
 }

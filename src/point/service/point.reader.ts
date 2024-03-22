@@ -1,8 +1,13 @@
+import { BadRequestException, Inject, Injectable } from '@nestjs/common';
 import { PointHistories, UserPoint } from '../model/point.model';
 import { IPointRepository } from '../repository/point.repository';
 
+@Injectable()
 export class PointReader {
-  constructor(private readonly pointRepository: IPointRepository) {}
+  constructor(
+    @Inject('IPointRepository')
+    private readonly pointRepository: IPointRepository,
+  ) {}
 
   async point(id: number): Promise<UserPoint> {
     this.isValid(id);
@@ -15,6 +20,6 @@ export class PointReader {
   }
 
   private isValid(id: number) {
-    if (id < 0) throw new Error(`올바르지 않은 ID 값 입니다.`);
+    if (id < 0) throw new BadRequestException(`올바르지 않은 ID 값 입니다.`);
   }
 }
