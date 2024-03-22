@@ -2,7 +2,6 @@ import { UserPointTable } from '../database/userpoint.table';
 import { PointController } from './point.controller';
 import { PointDto } from './point.dto';
 import { PointHandler } from './point.handler';
-import { PointMemoryQueue } from './point.memory.queue';
 import { PointReader } from './point.reader';
 import { PointHistoryTable } from '../database/pointhistory.table';
 
@@ -12,10 +11,9 @@ describe(`포인트 컨트롤러`, () => {
   beforeAll(() => {
     const userDb = new UserPointTable();
     const historyDb = new PointHistoryTable();
-    const pointQueue = new PointMemoryQueue();
 
     const pointReader = new PointReader(userDb, historyDb);
-    const pointHandler = new PointHandler(pointQueue, userDb, historyDb);
+    const pointHandler = new PointHandler(userDb, historyDb);
 
     controller = new PointController(pointReader, pointHandler);
   });
