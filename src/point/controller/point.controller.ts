@@ -6,24 +6,20 @@ import {
   Patch,
   ValidationPipe,
 } from '@nestjs/common';
-import { PointHistory, UserPoint } from './point.model';
-import { PointDto } from './point.dto';
-import { PointReader } from './point.reader';
-import { PointHandler } from './point.handler';
+import { PointHistory, UserPoint } from '../model/point.model';
+import { PointDto } from './dtos/point.dto';
+import { PointService } from '../service/point.service';
 
 @Controller('/point')
 export class PointController {
-  constructor(
-    private readonly pointReader: PointReader,
-    private readonly pointHandler: PointHandler,
-  ) {}
+  constructor(private readonly pointService: PointService) {}
 
   /**
    * TODO - 특정 유저의 포인트를 조회하는 기능을 작성해주세요.
    */
   @Get(':id')
   async point(@Param('id') id: number): Promise<UserPoint> {
-    return await this.pointReader.point(id);
+    return await this.pointService.point(id);
   }
 
   /**
@@ -31,7 +27,7 @@ export class PointController {
    */
   @Get(':id/histories')
   async histories(@Param('id') id: number): Promise<PointHistory[]> {
-    return await this.pointReader.histories(id);
+    return await this.pointService.histories(id);
   }
 
   /**
@@ -42,7 +38,7 @@ export class PointController {
     @Param('id') id: number,
     @Body(ValidationPipe) pointDto: PointDto,
   ): Promise<void> {
-    await this.pointHandler.charge(id, pointDto);
+    await this.pointService.charge(id, pointDto);
   }
 
   /**
@@ -53,6 +49,6 @@ export class PointController {
     @Param('id') id: number,
     @Body(ValidationPipe) pointDto: PointDto,
   ): Promise<void> {
-    await this.pointHandler.use(id, pointDto);
+    await this.pointService.use(id, pointDto);
   }
 }

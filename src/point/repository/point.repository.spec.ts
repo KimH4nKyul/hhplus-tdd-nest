@@ -1,6 +1,6 @@
-import { PointHistoryTable } from './pointhistory.table';
-import { UserPointTable } from './userpoint.table';
-import { IPointRepository } from '../point/interfaces/point.repository';
+import { PointHistoryTable } from '../../database/pointhistory.table';
+import { UserPointTable } from '../../database/userpoint.table';
+import { IPointRepository } from './point.repository';
 import { PointMemoryRepository } from './point.memory.repository';
 
 describe(`포인트 레포지토리`, () => {

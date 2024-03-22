@@ -1,11 +1,12 @@
-import { UserPointTable } from '../database/userpoint.table';
+import { UserPointTable } from '../../database/userpoint.table';
 import { PointController } from './point.controller';
-import { PointDto } from './point.dto';
-import { PointHandler } from './point.handler';
-import { PointReader } from './point.reader';
-import { PointHistoryTable } from '../database/pointhistory.table';
-import { PointMemoryRepository } from '../database/point.memory.repository';
-import { IPointRepository } from './interfaces/point.repository';
+import { PointDto } from './dtos/point.dto';
+import { PointHandler } from '../service/point.handler';
+import { PointReader } from '../service/point.reader';
+import { PointHistoryTable } from '../../database/pointhistory.table';
+import { PointMemoryRepository } from '../repository/point.memory.repository';
+import { IPointRepository } from '../repository/point.repository';
+import { PointService } from '../service/point.service';
 
 describe(`포인트 컨트롤러`, () => {
   let controller: PointController;
@@ -19,8 +20,9 @@ describe(`포인트 컨트롤러`, () => {
     );
     const pointReader = new PointReader(pointRepository);
     const pointHandler = new PointHandler(pointRepository);
+    const pointService = new PointService(pointHandler, pointReader);
 
-    controller = new PointController(pointReader, pointHandler);
+    controller = new PointController(pointService);
   });
 
   it(`❌ 포인트를 충전할 수 없음 - 포인트가 0보다 작음`, () => {

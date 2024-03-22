@@ -2,10 +2,10 @@ import {
   UserPoint,
   PointHistories,
   TransactionType,
-} from '../point/point.model';
-import { PointHistoryTable } from './pointhistory.table';
-import { UserPointTable } from './userpoint.table';
-import { IPointRepository } from '../point/interfaces/point.repository';
+} from '../model/point.model';
+import { PointHistoryTable } from '../../database/pointhistory.table';
+import { UserPointTable } from '../../database/userpoint.table';
+import { IPointRepository } from './point.repository';
 
 export class PointMemoryRepository implements IPointRepository {
   constructor(

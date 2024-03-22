@@ -1,5 +1,5 @@
-import { PointHistories, UserPoint } from './point.model';
-import { IPointRepository } from './interfaces/point.repository';
+import { PointHistories, UserPoint } from '../model/point.model';
+import { IPointRepository } from '../repository/point.repository';
 
 export class PointReader {
   constructor(private readonly pointRepository: IPointRepository) {}
@@ -16,6 +16,5 @@ export class PointReader {
 
   private isValid(id: number) {
     if (id < 0) throw new Error(`올바르지 않은 ID 값 입니다.`);
-    return;
   }
 }

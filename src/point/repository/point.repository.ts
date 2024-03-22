@@ -1,4 +1,4 @@
-import { PointHistories, UserPoint } from 'src/point/point.model';
+import { PointHistories, UserPoint } from 'src/point/model/point.model';
 
 export interface IPointRepository {
   point(id: number): Promise<UserPoint>;
