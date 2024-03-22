@@ -1,4 +1,4 @@
-import { TransactionType } from '../../src/point/point.model';
+import { TransactionType } from '../point/point.model';
 import { PointHistoryTable } from './pointhistory.table';
 
 describe(`포인트 히스토리 테이블`, () => {

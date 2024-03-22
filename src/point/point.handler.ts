@@ -1,49 +1,18 @@
-import { TransactionType, UserPoint } from './point.model';
+import { UserPoint } from './point.model';
 import { PointDto } from './point.dto';
-import { UserPointTable } from 'src/database/userpoint.table';
-import { PointHistoryTable } from 'src/database/pointhistory.table';
+import { IPointRepository } from './interfaces/point.repository';
 
 export class PointHandler {
-  constructor(
-    private readonly userDb: UserPointTable,
-    private readonly historyDb: PointHistoryTable,
-  ) {}
+  constructor(private readonly pointRepository: IPointRepository) {}
 
   async charge(id: number, pointDto: PointDto): Promise<UserPoint> {
     this.isValid(id, pointDto.amount);
-
-    let userPoint = await this.userDb.selectById(id);
-    const charged = userPoint.point + pointDto.amount;
-    userPoint = await this.userDb.insertOrUpdate(id, charged);
-
-    await this.historyDb.insert(
-      id,
-      pointDto.amount,
-      TransactionType.CHARGE,
-      Date.now(),
-    );
-
-    return userPoint;
+    return await this.pointRepository.charge(id, pointDto.amount);
   }
 
   async use(id: number, pointDto: PointDto): Promise<UserPoint> {
     this.isValid(id, pointDto.amount);
-
-    let userPoint = await this.userDb.selectById(id);
-    if (userPoint.point < pointDto.amount)
-      throw new Error(`사용할 수 있는 포인트가 없거나 적습니다.`);
-
-    const balance = userPoint.point - pointDto.amount;
-    userPoint = await this.userDb.insertOrUpdate(id, balance);
-
-    await this.historyDb.insert(
-      id,
-      pointDto.amount,
-      TransactionType.USE,
-      Date.now(),
-    );
-
-    return userPoint;
+    return await this.pointRepository.use(id, pointDto.amount);
   }
 
   private isValid(id: number, amount: number) {

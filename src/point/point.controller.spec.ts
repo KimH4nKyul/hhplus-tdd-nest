@@ -4,6 +4,8 @@ import { PointDto } from './point.dto';
 import { PointHandler } from './point.handler';
 import { PointReader } from './point.reader';
 import { PointHistoryTable } from '../database/pointhistory.table';
+import { PointMemoryRepository } from '../database/point.memory.repository';
+import { IPointRepository } from './interfaces/point.repository';
 
 describe(`포인트 컨트롤러`, () => {
   let controller: PointController;
@@ -11,9 +13,12 @@ describe(`포인트 컨트롤러`, () => {
   beforeAll(() => {
     const userDb = new UserPointTable();
     const historyDb = new PointHistoryTable();
-
-    const pointReader = new PointReader(userDb, historyDb);
-    const pointHandler = new PointHandler(userDb, historyDb);
+    const pointRepository: IPointRepository = new PointMemoryRepository(
+      userDb,
+      historyDb,
+    );
+    const pointReader = new PointReader(pointRepository);
+    const pointHandler = new PointHandler(pointRepository);
 
     controller = new PointController(pointReader, pointHandler);
   });
