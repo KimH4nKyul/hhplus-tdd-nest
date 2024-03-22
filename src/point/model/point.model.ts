@@ -21,3 +21,5 @@ export type PointHistory = {
   amount: number;
   timeMillis: number;
 };
+
+export type PointHistories = PointHistory[];
