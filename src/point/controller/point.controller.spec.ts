@@ -161,7 +161,13 @@ describe(`포인트 컨트롤러`, () => {
       controller.use(id, { amount: 500 }),
     ]);
 
-    const results = await Promise.all(promises);
-    console.log(results);
+    await Promise.all(promises);
+
+    userIds.forEach(async (id) => {
+      const userPoint = await controller.point(id);
+      expect(userPoint.updateMillis).toBeDefined();
+      expect(userPoint.id).toBe(id);
+      expect(userPoint.point).toBe(0);
+    });
   });
 });
