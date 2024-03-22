@@ -9,13 +9,13 @@ import {
 import { PointHistory, UserPoint } from './point.model';
 import { PointDto } from './point.dto';
 import { PointReader } from './point.reader';
-import { IPointHandler } from './point.controller.spec';
+import { PointHandler } from './point.handler';
 
 @Controller('/point')
 export class PointController {
   constructor(
     private readonly pointReader: PointReader,
-    private readonly pointHandler: IPointHandler,
+    private readonly pointHandler: PointHandler,
   ) {}
 
   /**
@@ -41,9 +41,8 @@ export class PointController {
   async charge(
     @Param('id') id: number,
     @Body(ValidationPipe) pointDto: PointDto,
-  ): Promise<UserPoint> {
+  ): Promise<void> {
     await this.pointHandler.charge(id, pointDto);
-    return await this.pointReader.point(id);
   }
 
   /**
@@ -53,8 +52,7 @@ export class PointController {
   async use(
     @Param('id') id: number,
     @Body(ValidationPipe) pointDto: PointDto,
-  ): Promise<UserPoint> {
+  ): Promise<void> {
     await this.pointHandler.use(id, pointDto);
-    return this.pointReader.point(id);
   }
 }

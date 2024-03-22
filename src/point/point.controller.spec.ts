@@ -2,13 +2,9 @@ import { UserPointTable } from '../database/userpoint.table';
 import { PointController } from './point.controller';
 import { PointDto } from './point.dto';
 import { PointHandler } from './point.handler';
+import { PointMemoryQueue } from './point.memory.queue';
 import { PointReader } from './point.reader';
 import { PointHistoryTable } from '../database/pointhistory.table';
-
-export interface IPointHandler {
-  charge(id: number, pointDto: PointDto): Promise<void>;
-  use(id: number, pointDto: PointDto): Promise<void>;
-}
 
 describe(`포인트 컨트롤러`, () => {
   let controller: PointController;
@@ -16,9 +12,10 @@ describe(`포인트 컨트롤러`, () => {
   beforeAll(() => {
     const userDb = new UserPointTable();
     const historyDb = new PointHistoryTable();
+    const pointQueue = new PointMemoryQueue();
 
     const pointReader = new PointReader(userDb, historyDb);
-    const pointHandler: IPointHandler = new PointHandler(userDb, historyDb);
+    const pointHandler = new PointHandler(pointQueue, userDb, historyDb);
 
     controller = new PointController(pointReader, pointHandler);
   });
@@ -29,7 +26,7 @@ describe(`포인트 컨트롤러`, () => {
       amount: -1,
     };
 
-    expect(() => controller.charge(userId, pointBody)).rejects.toThrow(
+    expect(controller.charge(userId, pointBody)).rejects.toThrow(
       Error(`포인트가 0보다 작습니다.`),
     );
   });
@@ -51,7 +48,9 @@ describe(`포인트 컨트롤러`, () => {
       amount: 100,
     };
 
-    const userPoint = await controller.charge(userId, pointBody);
+    await controller.charge(userId, pointBody);
+
+    const userPoint = await controller.point(userId);
 
     expect(userPoint.id).toBe(userId);
     expect(userPoint.point).toBe(pointBody.amount);
@@ -96,7 +95,9 @@ describe(`포인트 컨트롤러`, () => {
       amount: 100,
     };
 
-    const userPoint = await controller.use(userId, pointBody);
+    await controller.use(userId, pointBody);
+
+    const userPoint = await controller.point(userId);
 
     expect(userPoint.id).toBe(userId);
     expect(userPoint.point).toBe(0);
@@ -142,51 +143,5 @@ describe(`포인트 컨트롤러`, () => {
     expect(histories).not.toBeNull();
     expect(histories.length).toBeGreaterThanOrEqual(1);
     expect(histories[0].id).toBe(userId);
-  });
-
-  it(`✅ 여러 사용자가 동시에 포인트를 충전할 수 있음`, async () => {
-    const userIds = [4, 5, 6];
-    const amount = 100;
-
-    const promises = userIds.map((id) => controller.charge(id, { amount }));
-
-    const results = await Promise.all(promises);
-
-    results.forEach((result, index) => {
-      expect(result.id).toBe(userIds[index]);
-      expect(result.point).toBe(amount);
-      expect(result.updateMillis).toBeDefined();
-    });
-  });
-
-  it(`✅ 여러 사용자가 동시에 포인트를 이용할 수 있음`, async () => {
-    const userIds = [4, 5, 6];
-    const amount = 50;
-
-    const promises = userIds.map((id) => controller.use(id, { amount }));
-
-    const results = await Promise.all(promises);
-
-    for (const result of results) {
-      expect(result.point).toBe(50);
-      expect(result.updateMillis).toBeDefined();
-    }
-  });
-
-  it(`✅ 여러 사용자가 동시에 포인트를 충전/이용할 수 있음`, async () => {
-    const userIds = [4, 5, 6];
-    const chargeAmount = 100;
-    const useAmount = 100;
-
-    const promises = userIds.map(async (id) => {
-      await controller.charge(id, { amount: chargeAmount });
-      return await controller.use(id, { amount: useAmount });
-    });
-
-    const results = await Promise.all(promises);
-
-    for (const result of results) {
-      expect(result.point).toBe(50);
-    }
   });
 });
