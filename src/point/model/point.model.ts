@@ -1,5 +1,7 @@
+export type UserId = number;
+
 export type UserPoint = {
-  id: number;
+  id: UserId;
   point: number;
   updateMillis: number;
 };
@@ -16,7 +18,7 @@ export enum TransactionType {
 
 export type PointHistory = {
   id: number;
-  userId: number;
+  userId: UserId;
   type: TransactionType;
   amount: number;
   timeMillis: number;
