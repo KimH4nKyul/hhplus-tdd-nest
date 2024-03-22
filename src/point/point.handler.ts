@@ -12,17 +12,16 @@ export class PointHandler {
   async charge(id: number, pointDto: PointDto): Promise<UserPoint> {
     this.isValid(id, pointDto.amount);
 
+    let userPoint = await this.userDb.selectById(id);
+    const charged = userPoint.point + pointDto.amount;
+    userPoint = await this.userDb.insertOrUpdate(id, charged);
+
     await this.historyDb.insert(
       id,
       pointDto.amount,
       TransactionType.CHARGE,
       Date.now(),
     );
-
-    let userPoint = await this.userDb.selectById(id);
-    const charged = userPoint.point + pointDto.amount;
-
-    userPoint = await this.userDb.insertOrUpdate(id, charged);
 
     return userPoint;
   }
@@ -35,8 +34,8 @@ export class PointHandler {
       throw new Error(`사용할 수 있는 포인트가 없거나 적습니다.`);
 
     const balance = userPoint.point - pointDto.amount;
-
     userPoint = await this.userDb.insertOrUpdate(id, balance);
+
     await this.historyDb.insert(
       id,
       pointDto.amount,
@@ -50,5 +49,6 @@ export class PointHandler {
   private isValid(id: number, amount: number) {
     if (id < 0) throw new Error(`올바르지 않은 ID 값 입니다.`);
     if (amount < 0) throw new Error(`포인트가 0보다 작습니다.`);
+    return;
   }
 }
