@@ -39,7 +39,7 @@
 ![](https://i.imgur.com/AnSKQMk.png)
 
 다이어그램을 확인해 보면, `PointController`를 대상으로 테스트 스위트를 만들어 TDD를 진행해야 한다.
-그리고 `PointController`가 사용하는 Table 모듈들을 대상으로 단위 테스트를 작성한다.
+그리고 `PointController`와 컨트롤러가 사용하는 Table 모듈들을 대상으로 단위 테스트를 작성할 것이다.
 
 ---
 
@@ -102,14 +102,12 @@ npm run test point.controller
 ❌ 포인트 충전/이용 내역을 조회할 수 없음 - 올바르지 않은 ID 값
 ❌ 포인트 충전/이용 내역을 조회할 수 없음 - 내역이 없음
 ⭕️ 포인트 충전/이용 내역을 조회할 수 있음
-✅ 여러 사용자가 동시에 포인트를 충전할 수 있음
-✅ 여러 사용자가 동시에 포인트를 이용할 수 있음
-✅ 여러 사용자가 동시에 포인트를 충전/이용할 수 있음
+✅ 포인트 충전/이용에 대한 동시 요청을 순차처리 할 수 있음
 ```
 
 ---
 
-## End.
+## End(1).
 
 > ❓ 동시에 여러 건의 포인트 충전/이용 요청이 들어올 경우 순차적으로 처리되어야 한다.
 
@@ -119,11 +117,13 @@ npm run test point.controller
 
 ### Insight.
 
-멘토링을 통해 `Node.js`의 비동기 패러다임을 알고, `async-mutex`로 동시성/동기화 문제를 해결할 수 있음을 알게 되었다.
+> ❗️ 멘토링을 통해 `Node.js`의 비동기 패러다임을 알고, `async-mutex`로 동시성/동기화 문제를 해결할 수 있음을 알게 되었다.
+
+그렇지만 `Mutex`를 활용하면서 요청이 무한히 대기하는 상황을 피하기 위해 타임아웃을 설정했는데, 이를 보통 얼마 정도로 설정을 해야 하는지, 최적화 방안이 있다면 기준이 되는 지표는 무엇인지 알고 싶다.
 
 ---
 
-## Future Work.
+## Plan.
 
 ### 리팩토링 계획
 
@@ -134,3 +134,54 @@ npm run test point.controller
 - [x] ~~순차 처리를 위한 메모리 큐를 테스트 코드를 통해 구현한다.~~ ==_메모리큐가 아닌 뮤텍스를 활용_==
 - [x] 충분히 테스트 하고 구현이 완료되면 테스트 코드에서 실제 구현을 분리한다.
 - [x] 데이터베이스 계층의 경우에는 다른 데이터베이스로 교체할 경우를 위해 의존성을 역전한다.
+
+---
+
+## After.
+
+### 변경된 프로젝트 구조
+
+```
+📦src
+ ┣ 📂constants
+ ┃ ┗ 📜timeout.ts
+ ┣ 📂database
+ ┃ ┣ 📜database.module.ts
+ ┃ ┣ 📜pointhistory.table.spec.ts
+ ┃ ┣ 📜pointhistory.table.ts
+ ┃ ┣ 📜userpoint.table.spec.ts
+ ┃ ┗ 📜userpoint.table.ts
+ ┣ 📂point
+ ┃ ┣ 📂controller
+ ┃ ┃ ┣ 📂dtos
+ ┃ ┃ ┃ ┗ 📜point.dto.ts
+ ┃ ┃ ┣ 📜point.controller.spec.ts
+ ┃ ┃ ┗ 📜point.controller.ts
+ ┃ ┣ 📂model
+ ┃ ┃ ┗ 📜point.model.ts
+ ┃ ┣ 📂repository
+ ┃ ┃ ┣ 📜point.memory.repository.ts
+ ┃ ┃ ┣ 📜point.repository.spec.ts
+ ┃ ┃ ┗ 📜point.repository.ts
+ ┃ ┣ 📂service
+ ┃ ┃ ┣ 📜point.handler.ts
+ ┃ ┃ ┣ 📜point.reader.ts
+ ┃ ┃ ┗ 📜point.service.ts
+ ┃ ┗ 📜point.module.ts
+ ┣ 📜app.module.ts
+ ┗ 📜main.ts
+```
+
+### 변경된 레이아웃
+
+![](https://i.imgur.com/sqofoBv.png)
+
+---
+
+## End(2).
+
+단위 테스트만 작성하고 제출해서 아쉽다. 하지만 단위 테스트를 통해 TDD를 진행하면서 요구사항을 만족할 수 있었고, 어느정도 TDD에 대한 감을 잡을 수 있는 좋은 기회였다.
+
+이 프로젝트는 통합 테스트, E2E 테스트까지 개인적으로 완료해 볼 생각이다.
+
+이제 2주차 발제 내용을 열심히 듣고, 새로운 과제에 돌입할 차례다!
