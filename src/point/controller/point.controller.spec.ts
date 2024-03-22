@@ -100,9 +100,7 @@ describe(`포인트 컨트롤러`, () => {
       amount: 100,
     };
 
-    await controller.use(userId, pointBody);
-
-    const userPoint = await controller.point(userId);
+    const userPoint = await controller.use(userId, pointBody);
 
     expect(userPoint.id).toBe(userId);
     expect(userPoint.point).toBe(0);
