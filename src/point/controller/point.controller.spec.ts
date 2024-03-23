@@ -149,9 +149,14 @@ describe(`포인트 컨트롤러`, () => {
   });
 
   it(`✅ 포인트 충전/이용에 대한 동시 요청을 순차처리 할 수 있음`, async () => {
-    const userIds = [1, 2, 3];
+    const userIds = [1, 2, 3, 4, 5, 1, 2, 3, 4, 5];
 
     const promises = userIds.flatMap((id) => [
+      controller.charge(id, { amount: 100 }),
+      controller.use(id, { amount: 100 }),
+      controller.charge(id, { amount: 200 }),
+      controller.charge(id, { amount: 300 }),
+      controller.use(id, { amount: 500 }),
       controller.charge(id, { amount: 100 }),
       controller.use(id, { amount: 100 }),
       controller.charge(id, { amount: 200 }),

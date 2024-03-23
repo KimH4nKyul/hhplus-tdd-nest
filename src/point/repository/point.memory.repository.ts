@@ -39,23 +39,18 @@ export class PointMemoryRepository implements IPointRepository {
     const mutex = this.mutexOf(id);
     const release = await mutex.acquire();
 
-    let userPoint: UserPoint;
     try {
-      userPoint = await this.point(id);
+      const userPoint: UserPoint = await this.point(id);
       if (userPoint.point < amount)
         throw new BadRequestException(
           `사용할 수 있는 포인트가 없거나 적습니다.`,
         );
-
       const balance = userPoint.point - amount;
-      userPoint = await this.userDb.insertOrUpdate(id, balance);
+      return await this.userDb.insertOrUpdate(id, balance);
     } finally {
       release();
+      this.historyDb.insert(id, amount, TransactionType.USE, Date.now());
     }
-
-    await this.historyDb.insert(id, amount, TransactionType.USE, Date.now());
-
-    return userPoint;
   }
 
   async charge(id: number, amount: number): Promise<UserPoint> {
@@ -65,19 +60,19 @@ export class PointMemoryRepository implements IPointRepository {
     const mutex = this.mutexOf(id);
     const release = await mutex.acquire();
 
-    let userPoint: UserPoint;
     try {
-      userPoint = await this.point(id);
+      const userPoint: UserPoint = await this.point(id);
       const charged = userPoint.point + amount;
-
-      userPoint = await this.userDb.insertOrUpdate(id, charged);
+      return await this.userDb.insertOrUpdate(id, charged);
     } finally {
       release();
+      await this.historyDb.insert(
+        id,
+        amount,
+        TransactionType.CHARGE,
+        Date.now(),
+      );
     }
-
-    await this.historyDb.insert(id, amount, TransactionType.CHARGE, Date.now());
-
-    return userPoint;
   }
 
   private mutexOf(id: number): MutexInterface {
